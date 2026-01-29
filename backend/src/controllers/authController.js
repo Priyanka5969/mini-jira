@@ -25,6 +25,11 @@ export const register = async(req,res,next) => {
     try {
         const {name, email, password} = req.body;
 
+        // Validate input
+        if (!name || !email || !password) {
+            return res.status(400).json({message: "Name, email, and password are required"});
+        }
+
         const exists = await findByEmail(email);
         if(exists){
             return res.status(400).json({message: "Email already exists"});
@@ -48,19 +53,28 @@ export const register = async(req,res,next) => {
 }
 
 export const login = async(req,res,next) => {
-    const {email, password} = req.body;
-    
-    const user = await findByEmail(email);
-    if(!user){ 
-        return res.status(400).json({message:"Invalid credentials"});
-    }
+    try {
+        const {email, password} = req.body;
+        
+        // Validate input
+        if (!email || !password) {
+            return res.status(400).json({message: "Email and password are required"});
+        }
 
-    const match = await bcrypt.compare(password, user.password);
-    if(!match){
-        return res.status(400).json({message: "Invalid credentials"})
-    }
+        const user = await findByEmail(email);
+        if(!user){ 
+            return res.status(400).json({message:"Invalid credentials"});
+        }
 
-    sendToken(user, res);
+        const match = await bcrypt.compare(password, user.password);
+        if(!match){
+            return res.status(400).json({message: "Invalid credentials"})
+        }
+
+        sendToken(user, res);
+    } catch (error) {
+        next(error);
+    }
 }
 
 export const logout = async(req, res) => {
