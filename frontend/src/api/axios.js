@@ -5,4 +5,13 @@ const api = axios.create({
   withCredentials: true
 });
 
+// Add token to requests from localStorage (fallback for blocked cookies)
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('authToken');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 export default api;

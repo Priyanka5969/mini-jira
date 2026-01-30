@@ -13,16 +13,24 @@ const sendToken = (user, res) => {
 
     const isProduction = process.env.NODE_ENV === 'production' || process.env.FRONTEND_URL?.includes('netlify') || process.env.FRONTEND_URL?.includes('https://');
     
-    res.cookie("token", token , {
-        httpOnly: true,
-        secure: isProduction, // HTTPS only in production
-        sameSite: isProduction ? 'none' : 'lax', // Required for cross-origin in production
-        maxAge: 2 * 24 * 60 * 60 * 1000, // 2 days
-    });
+    // Try to set cookie (may fail if cookies are blocked)
+    try {
+        res.cookie("token", token , {
+            httpOnly: true,
+            secure: isProduction, // HTTPS only in production
+            sameSite: isProduction ? 'none' : 'lax', // Required for cross-origin in production
+            maxAge: 2 * 24 * 60 * 60 * 1000, // 2 days
+        });
+    } catch (error) {
+        // Cookie setting failed, but we'll still send token in response body
+        console.log("Cookie setting failed, using token in response body");
+    }
 
+    // Always send token in response body as fallback for blocked cookies
     res.json({
         message: "Success",
         user: {id: user._id, name: user.name, email: user.email},
+        token: token, // Include token in response for localStorage fallback
     });
 };
 

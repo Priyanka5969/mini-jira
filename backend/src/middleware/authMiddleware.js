@@ -2,26 +2,31 @@ import jwt from 'jsonwebtoken';
 import { findUserById } from '../services/userService.js';
 
 export default async function auth(req,res,next){
-    console.log("🔍 Cookies received in middleware:", req.cookies);
-
-    const token = req.cookies.token;
-    console.log("🔍 Token extracted:", token);
+    // Try to get token from cookies first (preferred method)
+    let token = req.cookies.token;
+    
+    // If no cookie token, try Authorization header (fallback for blocked cookies)
+    if (!token) {
+        const authHeader = req.headers.authorization;
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+            token = authHeader.substring(7);
+        }
+    }
 
     try {
         if(!token){
-            console.log("❌ No token found in cookies");
             return res.status(401).json({message: "Not logged in"});
         }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        console.log("🔍 Token decoded:", decoded);
-
         req.user = await findUserById(decoded.id);
-        console.log("🔍 User found from DB:", req.user);
+
+        if (!req.user) {
+            return res.status(401).json({ message: "User not found" });
+        }
 
         next();
     } catch (error) {
-        console.log("❌ AUTH ERROR:", error);
         res.status(401).json({ message: "Unauthorized" });
     }
 }

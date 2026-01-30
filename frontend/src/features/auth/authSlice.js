@@ -3,11 +3,19 @@ import api from "../../api/axios";
 
 export const registerUser = createAsyncThunk("auth/register", async (data) => {
   const res = await api.post("/auth/register", data);
+  // Store token in localStorage as fallback if cookies are blocked
+  if (res.data.token) {
+    localStorage.setItem('authToken', res.data.token);
+  }
   return res.data.user;
 });
 
 export const loginUser = createAsyncThunk("auth/login", async (data) => {
   const res = await api.post("/auth/login", data);
+  // Store token in localStorage as fallback if cookies are blocked
+  if (res.data.token) {
+    localStorage.setItem('authToken', res.data.token);
+  }
   return res.data.user;
 });
 
@@ -18,6 +26,8 @@ export const fetchMe = createAsyncThunk("auth/me", async () => {
 
 export const logoutUser = createAsyncThunk("auth/logout", async () => {
   await api.get("/auth/logout");
+  // Clear token from localStorage
+  localStorage.removeItem('authToken');
 });
 
 const authSlice = createSlice({
