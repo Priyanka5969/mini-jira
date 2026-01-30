@@ -26,9 +26,16 @@ export default function Dashboard() {
   const [search, setSearch] = useState("");
   const debounced = useDebounce(search);
 
+  // Fetch tasks on initial load
+  useEffect(() => {
+    dispatch(fetchTasks());
+  }, [dispatch]);
+
   // Fetch tasks on search
   useEffect(() => {
-    dispatch(fetchTasks(debounced));
+    if (debounced !== "") {
+      dispatch(fetchTasks(debounced));
+    }
   }, [debounced, dispatch]);
 
   // Calculate stats locally from tasks (no API call needed)
