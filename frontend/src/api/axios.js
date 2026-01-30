@@ -7,31 +7,18 @@ const api = axios.create({
 });
 
 // Retry configuration
-const MAX_RETRIES = 3;
-const RETRY_DELAY = 2000; // 2 seconds
+const MAX_RETRIES = 2; // Reduced retries since we have 60s timeout
+const RETRY_DELAY = 5000; // 5 seconds between retries
 
 // Helper function to check if error is retryable
 const isRetryableError = (error) => {
   // Network errors or 5xx server errors
   return (
     !error.response || // Network error
-    error.response.status >= 500 || // Server error
+    (error.response && error.response.status >= 500) || // Server error
     error.code === 'ECONNABORTED' || // Timeout
     error.code === 'ERR_NETWORK' // Network error
   );
-};
-
-// Retry logic with exponential backoff
-const retryRequest = async (config, retryCount = 0) => {
-  if (retryCount >= MAX_RETRIES) {
-    throw new Error('Backend is taking too long to respond. Please try again in a moment.');
-  }
-
-  const delay = RETRY_DELAY * Math.pow(2, retryCount); // Exponential backoff
-  
-  await new Promise(resolve => setTimeout(resolve, delay));
-  
-  return api.request(config);
 };
 
 // Add token to requests from localStorage (fallback for blocked cookies)
@@ -57,9 +44,24 @@ api.interceptors.response.use(
     }
 
     // Retry on network/server errors
-    if (isRetryableError(error) && error.config && !error.config.__retryCount) {
-      error.config.__retryCount = (error.config.__retryCount || 0) + 1;
-      return retryRequest(error.config, error.config.__retryCount - 1);
+    const config = error.config;
+    if (isRetryableError(error) && config && !config.__retryCount) {
+      config.__retryCount = config.__retryCount || 0;
+      
+      if (config.__retryCount < MAX_RETRIES) {
+        config.__retryCount += 1;
+        
+        // Wait before retrying
+        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+        
+        // Retry the request
+        return api.request(config);
+      }
+    }
+
+    // Format error message for user
+    if (!error.response) {
+      error.message = 'Cannot connect to server. The backend may be starting up (takes up to 60 seconds).';
     }
 
     return Promise.reject(error);
