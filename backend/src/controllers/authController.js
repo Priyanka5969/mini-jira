@@ -11,7 +11,7 @@ const sendToken = (user, res) => {
         expiresIn: "2d",
     });
 
-    const isProduction = process.env.NODE_ENV === 'production';
+    const isProduction = process.env.NODE_ENV === 'production' || process.env.FRONTEND_URL?.includes('netlify') || process.env.FRONTEND_URL?.includes('https://');
     
     res.cookie("token", token , {
         httpOnly: true,
@@ -83,7 +83,7 @@ export const login = async(req,res,next) => {
 }
 
 export const logout = async(req, res) => {
-    const isProduction = process.env.NODE_ENV === 'production';
+    const isProduction = process.env.NODE_ENV === 'production' || process.env.FRONTEND_URL?.includes('netlify') || process.env.FRONTEND_URL?.includes('https://');
     res.clearCookie("token", {
         httpOnly: true,
         secure: isProduction,
