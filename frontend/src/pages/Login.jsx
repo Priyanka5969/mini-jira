@@ -10,8 +10,13 @@ export default function Login(){
 
     const submit = async(e) => {
         e.preventDefault();
-        await dispatch(loginUser(data));
-        navigate("/");
+        const result = await dispatch(loginUser(data));
+        if (loginUser.fulfilled.match(result)) {
+            navigate("/");
+        } else {
+            const errorMsg = result.payload || result.error?.message || "Login failed. Please try again.";
+            alert(errorMsg);
+        }
     }
 
     return (

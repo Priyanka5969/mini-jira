@@ -10,8 +10,13 @@ export default function Register() {
 
   const submit = async (e) => {
     e.preventDefault();
-    await dispatch(registerUser(data));
-    navigate("/");
+    const result = await dispatch(registerUser(data));
+    if (registerUser.fulfilled.match(result)) {
+      navigate("/");
+    } else {
+      const errorMsg = result.payload || result.error?.message || "Registration failed. Please try again.";
+      alert(errorMsg);
+    }
   };
 
   return (
