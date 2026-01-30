@@ -11,8 +11,13 @@ const sendToken = (user, res) => {
         expiresIn: "2d",
     });
 
+    const isProduction = process.env.NODE_ENV === 'production';
+    
     res.cookie("token", token , {
         httpOnly: true,
+        secure: isProduction, // HTTPS only in production
+        sameSite: isProduction ? 'none' : 'lax', // Required for cross-origin in production
+        maxAge: 2 * 24 * 60 * 60 * 1000, // 2 days
     });
 
     res.json({
@@ -78,7 +83,12 @@ export const login = async(req,res,next) => {
 }
 
 export const logout = async(req, res) => {
-    res.clearCookie("token");
+    const isProduction = process.env.NODE_ENV === 'production';
+    res.clearCookie("token", {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? 'none' : 'lax',
+    });
     res.json({message: "Logged out"});
 };
 
