@@ -48,6 +48,11 @@ const authSlice = createSlice({
       .addCase(fetchMe.fulfilled, (state, action) => {
         state.user = action.payload;
       })
+      .addCase(fetchMe.rejected, (state) => {
+        // If fetchMe fails, clear invalid token
+        state.user = null;
+        localStorage.removeItem('authToken');
+      })
       .addCase(logoutUser.fulfilled, (state) => {
         state.user = null;
       });
