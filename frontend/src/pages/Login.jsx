@@ -15,10 +15,10 @@ export default function Login(){
     }
 
     return (
-        <div className="flex items-center justify-center min-h-screen">
+        <div className="flex items-center justify-center min-h-screen p-4">
             <form
             onSubmit={submit}
-            className="bg-white p-8 shadow rounded w-96 space-y-4" 
+            className="bg-white p-8 shadow rounded w-full max-w-md space-y-4" 
             >
                 <h2 className="text-2xl font-bold text-center">Login</h2>
                 <input

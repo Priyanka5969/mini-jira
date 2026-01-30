@@ -8,14 +8,14 @@ export default function Navbar() {
   const dispatch = useDispatch();
 
   return (
-    <div className="bg-white shadow p-4 flex justify-between items-center">
+    <div className="bg-white shadow p-4 flex flex-col sm:flex-row justify-between items-center gap-2">
       <Link to="/" className="text-xl font-bold">Mini Jira</Link>
 
-      <div className="flex items-center gap-4">
-        <span>{user?.name}</span>
+      <div className="flex items-center gap-2 sm:gap-4">
+        <span className="text-sm sm:text-base">{user?.name}</span>
 
         <button
-          className="px-3 py-1 bg-gray-200 rounded"
+          className="px-3 py-1 bg-gray-200 rounded text-sm sm:text-base"
           onClick={() => dispatch(logoutUser())}
         >
           Logout

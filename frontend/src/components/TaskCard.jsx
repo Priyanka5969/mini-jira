@@ -33,13 +33,13 @@ export default function TaskCard({ task, onStatusChange, onEdit }) {
       <h3 className="font-semibold">{task.title}</h3>
 
       {/* Status buttons */}
-      <div className="mt-3 flex gap-2">
+      <div className="mt-3 flex flex-wrap gap-2">
         {["new", "inprogress", "completed"].map((s) =>
           s !== task.status ? (
             <button
               key={s}
               onClick={() => onStatusChange(s)}
-              className="px-2 py-1 border rounded text-sm hover:bg-gray-100 capitalize"
+              className="px-2 py-1 border rounded text-xs sm:text-sm hover:bg-gray-100 capitalize"
             >
               {s}
             </button>

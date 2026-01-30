@@ -53,19 +53,19 @@ export default function Dashboard() {
     <>
       <Navbar />
 
-      <div className="p-6">
+      <div className="p-4 md:p-6">
         {/* SEARCH + ADD BUTTON */}
-        <div className="flex justify-between mb-4">
+        <div className="flex flex-col sm:flex-row justify-between gap-4 mb-4">
           <input
             placeholder="Search tasks..."
-            className="border p-2 rounded w-60"
+            className="border p-2 rounded w-full sm:w-60"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
 
           <button
             onClick={() => setModalOpen(true)}
-            className="px-4 py-2 bg-indigo-600 text-white rounded"
+            className="px-4 py-2 bg-indigo-600 text-white rounded whitespace-nowrap"
           >
             + Add Task
           </button>
@@ -89,25 +89,25 @@ export default function Dashboard() {
         )}
 
         {/* ANALYTICS */}
-        <div className="flex gap-6 mb-6">
-          <div className="bg-white shadow rounded-xl p-4 w-40 text-center">
+        <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 mb-6">
+          <div className="bg-white shadow rounded-xl p-4 flex-1 text-center">
             <p className="text-gray-500 text-sm">New</p>
             <p className="text-2xl font-semibold">{stats.new || 0}</p>
           </div>
 
-          <div className="bg-white shadow rounded-xl p-4 w-40 text-center">
+          <div className="bg-white shadow rounded-xl p-4 flex-1 text-center">
             <p className="text-gray-500 text-sm">In Progress</p>
             <p className="text-2xl font-semibold">{stats.inprogress || 0}</p>
           </div>
 
-          <div className="bg-white shadow rounded-xl p-4 w-40 text-center">
+          <div className="bg-white shadow rounded-xl p-4 flex-1 text-center">
             <p className="text-gray-500 text-sm">Completed</p>
             <p className="text-2xl font-semibold">{stats.completed || 0}</p>
           </div>
         </div>
 
         {/* TASK COLUMNS */}
-        <div className="flex gap-4">
+        <div className="flex flex-col lg:flex-row gap-4">
           <Column
             title="New"
             tasks={tasks.filter((t) => t.status === "new")}

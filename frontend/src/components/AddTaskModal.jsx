@@ -10,10 +10,10 @@ export default function AddTaskModal({ onClose, onSubmit }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center p-4">
       <form
         onSubmit={submit}
-        className="bg-white p-6 rounded shadow space-y-4 w-80"
+        className="bg-white p-6 rounded shadow space-y-4 w-full max-w-md"
       >
         <h2 className="font-bold text-lg">Add Task</h2>
 
