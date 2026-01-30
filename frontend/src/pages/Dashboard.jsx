@@ -4,6 +4,7 @@ import Navbar from "../components/Navbar";
 import Column from "../components/Column";
 import AddTaskModal from "../components/AddTaskModal";
 import EditTaskModal from "../components/EditTaskModal";
+import ErrorNotification from "../components/ErrorNotification";
 import { 
   fetchTasks, 
   createTask, 
@@ -22,13 +23,26 @@ export default function Dashboard() {
 
   const [editTask, setEditTask] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [search, setSearch] = useState("");
   const debounced = useDebounce(search);
 
   // Fetch tasks on search or initial load
   useEffect(() => {
-    dispatch(fetchTasks(debounced));
+    setIsLoading(true);
+    setError(null);
+    dispatch(fetchTasks(debounced))
+      .unwrap()
+      .then(() => {
+        setIsLoading(false);
+        setError(null);
+      })
+      .catch((err) => {
+        setIsLoading(false);
+        setError(err);
+      });
   }, [debounced, dispatch]);
 
   // Calculate stats locally from tasks (no API call needed)
@@ -55,9 +69,38 @@ export default function Dashboard() {
     // No need to refetch - Redux already updates the task in state
   };
 
+  const handleRetry = () => {
+    setIsLoading(true);
+    setError(null);
+    dispatch(fetchTasks(debounced))
+      .unwrap()
+      .then(() => {
+        setIsLoading(false);
+        setError(null);
+      })
+      .catch((err) => {
+        setIsLoading(false);
+        setError(err);
+      });
+  };
+
   return (
     <>
       <Navbar />
+      
+      <ErrorNotification 
+        error={error} 
+        onRetry={handleRetry}
+        onDismiss={() => setError(null)}
+      />
+
+      {isLoading && !error && (
+        <div className="fixed top-4 right-4 z-50 bg-blue-50 border border-blue-200 rounded-lg shadow-lg p-4">
+          <p className="text-blue-800 text-sm">
+            ⏳ Connecting to server... (This may take up to 60 seconds)
+          </p>
+        </div>
+      )}
 
       <div className="p-4 md:p-6">
         {/* SEARCH + ADD BUTTON */}
