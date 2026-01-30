@@ -59,6 +59,16 @@ const tasksSlice = createSlice({
       .addCase(createTask.fulfilled, (state, action) => {
         state.items.unshift(action.payload);
       })
+      // Optimistic update for status changes - update immediately
+      .addCase(updateTask.pending, (state, action) => {
+        const { id, data } = action.meta.arg;
+        if (data.status) {
+          const idx = state.items.findIndex((t) => t._id === id);
+          if (idx !== -1) {
+            state.items[idx] = { ...state.items[idx], status: data.status };
+          }
+        }
+      })
       .addCase(updateTask.fulfilled, (state, action) => {
         const idx = state.items.findIndex((t) => t._id === action.payload._id);
         if (idx !== -1) state.items[idx] = action.payload;

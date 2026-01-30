@@ -31,22 +31,28 @@ export default function Dashboard() {
     dispatch(fetchTasks(debounced));
   }, [debounced, dispatch]);
 
-  // Update analytics whenever tasks change
-  useEffect(() => {
-    dispatch(fetchStats());
-    dispatch(fetchLast7Days());
-  }, [tasks, dispatch]);
+  // Calculate stats locally from tasks (no API call needed)
+  const localStats = {
+    new: tasks.filter(t => t.status === "new").length,
+    inprogress: tasks.filter(t => t.status === "inprogress").length,
+    completed: tasks.filter(t => t.status === "completed").length,
+  };
 
+  // Only fetch analytics on initial load or when explicitly needed
+  useEffect(() => {
+    if (tasks.length === 0) {
+      dispatch(fetchStats());
+      dispatch(fetchLast7Days());
+    }
+  }, []);
 
   // --------------------------
   // CHANGE STATUS
   // --------------------------
   const changeStatus = (id, status) => {
-    dispatch(updateTask({ id, data: { status } }))
-      .then(() => {
-        dispatch(fetchTasks());
-        dispatch(fetchStats());
-      });
+    // Optimistic update - update immediately without waiting for API
+    dispatch(updateTask({ id, data: { status } }));
+    // No need to refetch - Redux already updates the task in state
   };
 
   return (
@@ -77,13 +83,9 @@ export default function Dashboard() {
             task={editTask}
             onClose={() => setEditTask(null)}
             onSubmit={(data) => {
-              dispatch(updateTask({ id: editTask._id, data }))
-                .then(() => {
-                  dispatch(fetchTasks());
-                  dispatch(fetchStats());
-                });
-
+              dispatch(updateTask({ id: editTask._id, data }));
               setEditTask(null);
+              // No need to refetch - Redux updates the task automatically
             }}
           />
         )}
@@ -92,17 +94,17 @@ export default function Dashboard() {
         <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 mb-6">
           <div className="bg-white shadow rounded-xl p-4 flex-1 text-center">
             <p className="text-gray-500 text-sm">New</p>
-            <p className="text-2xl font-semibold">{stats.new || 0}</p>
+            <p className="text-2xl font-semibold">{localStats.new}</p>
           </div>
 
           <div className="bg-white shadow rounded-xl p-4 flex-1 text-center">
             <p className="text-gray-500 text-sm">In Progress</p>
-            <p className="text-2xl font-semibold">{stats.inprogress || 0}</p>
+            <p className="text-2xl font-semibold">{localStats.inprogress}</p>
           </div>
 
           <div className="bg-white shadow rounded-xl p-4 flex-1 text-center">
             <p className="text-gray-500 text-sm">Completed</p>
-            <p className="text-2xl font-semibold">{stats.completed || 0}</p>
+            <p className="text-2xl font-semibold">{localStats.completed}</p>
           </div>
         </div>
 
@@ -135,12 +137,10 @@ export default function Dashboard() {
       {modalOpen && (
         <AddTaskModal
           onClose={() => setModalOpen(false)}
-          onSubmit={(data) =>
-            dispatch(createTask(data)).then(() => {
-              dispatch(fetchTasks());
-              dispatch(fetchStats());
-            })
-          }
+          onSubmit={(data) => {
+            dispatch(createTask(data));
+            // No need to refetch - Redux adds the task automatically
+          }}
         />
       )}
     </>
